@@ -1,0 +1,8 @@
+module.exports = {
+	STATE: {
+		PENDING: 'PENDING',
+		SUCCEEDED: 'SUCCEEDED',
+		FAILED: 'FAILED',
+		REJECTED: 'REJECTED',
+	},
+};
