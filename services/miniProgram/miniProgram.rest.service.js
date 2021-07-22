@@ -21,7 +21,7 @@ module.exports = {
 		createOrder: {
 			rest: {
 				method: 'POST',
-				fullPath: '/eKYC/generateToken',
+				fullPath: '/v1/MiniProgram/CreateOrder',
 				auth: {
 					strategies: ['Default'],
 					mode: 'try', // 'required', 'optional', 'try'
