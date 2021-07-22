@@ -1,11 +1,9 @@
-const ApolloValidation = require('@profusion/apollo-validation-directives');
-
 module.exports = {
 	name: 'MiniProgram.graph',
 
 	version: 1,
 
-	mixins: [ApolloValidation],
+	mixins: [],
 
 	/**
 	 * Settings
@@ -104,13 +102,11 @@ module.exports = {
  * Service started lifecycle event handler
  */
 	async started() {
-
 	},
 
 	/**
  * Service stopped lifecycle event handler
  */
 	async stopped() {
-
 	},
 };

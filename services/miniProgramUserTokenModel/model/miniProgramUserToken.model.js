@@ -20,10 +20,17 @@ const Schema = mongoose.Schema({
 		require: true,
 		unique: true,
 	},
-	userToken: {
-		type: String,
+	accountId: {
+		type: Number,
 		require: true,
-		unique: true,
+	},
+	expiredAt: {
+		type: Date,
+		require: true,
+	},
+	platform: {
+		type: String,
+		default: null,
 	},
 	scope: [
 		{
@@ -35,18 +42,6 @@ const Schema = mongoose.Schema({
 		type: String,
 		require: true,
 		enum: _.values(MiniProgramUserTokenConstant.STATE),
-	},
-	username: {
-		type: String,
-		require: true,
-	},
-	phone: {
-		type: String,
-		require: true,
-	},
-	accountId: {
-		type: Number,
-		require: true,
 	},
 }, {
 	collection: 'Service_MiniProgramUserToken',

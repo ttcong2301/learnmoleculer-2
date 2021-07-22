@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const DbService = require('moleculer-db');
 const MongooseAdapter = require('moleculer-db-adapter-mongoose');
 const MongooseAction = require('moleculer-db-adapter-mongoose-action');
-const MiniProgramTokenModel = require('./model/miniProgramToken.model');
+const miniProgramInfoModel = require('./model/miniProgramInfo.model');
 
 module.exports = {
-	name: 'MiniProgramTokenModel',
+	name: 'miniProgramInfoModel',
 
 	version: 1,
 
@@ -17,7 +17,7 @@ module.exports = {
 		keepAlive: true,
 	}),
 
-	model: MiniProgramTokenModel,
+	model: miniProgramInfoModel,
 
 	/**
 	 * Settings

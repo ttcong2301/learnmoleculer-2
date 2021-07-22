@@ -16,6 +16,14 @@ const Schema = mongoose.Schema({
 		required: true,
 		unique: true,
 	},
+	accountId: {
+		type: Number,
+		require: true,
+	},
+	miniProgramId: {
+		type: Number,
+		require: true,
+	},
 	transaction: {
 		type: String,
 		require: true,
@@ -42,12 +50,14 @@ const Schema = mongoose.Schema({
 	},
 	redirectUrl: {
 		type: String,
-		require: true,
 		default: null,
 	},
 	failedUrl: {
 		type: String,
-		require: true,
+		default: null,
+	},
+	ipnUrl: {
+		type: String,
 		default: null,
 	},
 	description: {
@@ -55,24 +65,18 @@ const Schema = mongoose.Schema({
 		require: true,
 		default: null,
 	},
-	accountId: {
-		type: Number,
-		require: true,
-	},
 	state: {
 		type: String,
 		enum: _.values(MiniProgramOrderConstant.STATE),
 	},
-	service: {
-		name: {
-			type: String,
-			require: true,
-		},
-		miniProgramId: {
-			type: Number,
-			require: true,
-		},
+	payment: {
+		id: { type: Number },
+		transaction: { type: String },
+		method: { type: String },
+		state: { type: String },
+		description: { type: String },
 	},
+	extraData: Object,
 }, {
 	collection: 'Service_MiniProgramOrder',
 	versionKey: false,

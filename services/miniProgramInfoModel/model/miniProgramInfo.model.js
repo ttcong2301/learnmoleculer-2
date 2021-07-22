@@ -3,7 +3,7 @@ const autoIncrement = require('mongoose-auto-increment');
 const { customAlphabet } = require('nanoid');
 const { alphanumeric } = require('nanoid-dictionary');
 const _ = require('lodash');
-const MiniProgramTokenConstant = require('../constants/MiniProgramTokenConstant');
+const miniProgramInfoConstant = require('../constants/miniProgramInfoConstant');
 
 const nanoId = customAlphabet(alphanumeric, 15);
 
@@ -29,23 +29,35 @@ const Schema = mongoose.Schema({
 		type: String,
 		require: true,
 	},
+	ipnUrl: {
+		type: String,
+		require: true,
+	},
+	secretKey: {
+		type: String,
+		default: null,
+	},
 	scope: [
 		{
 			type: String,
-			enum: _.values(MiniProgramTokenConstant.SCOPE),
+			enum: _.values(miniProgramInfoConstant.SCOPE),
 		},
 	],
 	state: {
 		type: String,
 		require: true,
-		enum: _.values(MiniProgramTokenConstant.STATE),
+		enum: _.values(miniProgramInfoConstant.STATE),
 	},
 	name: {
 		type: String,
 		require: true,
 	},
+	logo: {
+		type: String,
+		require: true,
+	},
 }, {
-	collection: 'Service_MiniProgramToken',
+	collection: 'Service_miniProgramInfo',
 	versionKey: false,
 	timestamps: true,
 });
