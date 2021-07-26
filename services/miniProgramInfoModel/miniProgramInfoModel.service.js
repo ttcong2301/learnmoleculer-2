@@ -5,7 +5,7 @@ const MongooseAction = require('moleculer-db-adapter-mongoose-action');
 const miniProgramInfoModel = require('./model/miniProgramInfo.model');
 
 module.exports = {
-	name: 'miniProgramInfoModel',
+	name: 'MiniProgramInfoModel',
 
 	version: 1,
 

@@ -19,6 +19,9 @@ module.exports = {
 			'tab',
 			{ SwitchCase: 1 },
 		],
+		'max-len': [
+			'off',
+		],
 		quotes: [
 			'warn',
 			'single',

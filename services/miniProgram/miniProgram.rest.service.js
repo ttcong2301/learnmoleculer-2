@@ -21,7 +21,7 @@ module.exports = {
 		createOrder: {
 			rest: {
 				method: 'POST',
-				fullPath: '/v1/MiniProgram/CreateOrder',
+				fullPath: '/v1/External/MiniProgram/CreateOrder',
 				auth: {
 					strategies: ['Default'],
 					mode: 'try', // 'required', 'optional', 'try'
@@ -43,7 +43,7 @@ module.exports = {
 		getUserInformation: {
 			rest: {
 				method: 'POST',
-				fullPath: '/v1/MiniProgram/UserInformation',
+				fullPath: '/v1/External/MiniProgram/UserInformation',
 				auth: {
 					strategies: ['Default'],
 					mode: 'try', // 'required', 'optional', 'try'
@@ -60,7 +60,7 @@ module.exports = {
 		requestUserPermission: {
 			rest: {
 				method: 'POST',
-				fullPath: '/v1/MiniProgram/RequestPermission',
+				fullPath: '/v1/External/MiniProgram/RequestPermission',
 				auth: {
 					strategies: ['Default'],
 					mode: 'try', // 'required', 'optional', 'try'
@@ -75,6 +75,60 @@ module.exports = {
 			},
 			handler: require('./actions/requestUserPermission.rest.action'),
 		},
+		add: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/Internal/MiniProgram/add',
+				auth: {
+					strategies: ['Local'],
+					mode: 'try', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: 'object',
+					miniProgramId: 'number',
+					url: 'string',
+					ipnUrl: 'string',
+					scope: { type: 'array', items: 'string' },
+					state: 'string',
+					name: 'string',
+					logo: 'string',
+				},
+			},
+			handler: require('./actions/add.rest.action'),
+		},
+		edit: {
+			rest: {
+				method: 'PUT',
+				fullPath: '/v1/Internal/MiniProgram/{miniProgramId}',
+				auth: {
+					strategies: ['Local'],
+					mode: 'try', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				miniProgramId: 'number',
+				body: {
+					$$type: 'object',
+				},
+			},
+			handler: require('./actions/edit.rest.action'),
+		},
+		search: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/Internal/MiniProgram/search',
+				auth: {
+					strategies: ['Local'],
+					mode: 'try', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: 'object',
+			},
+			handler: require('./actions/search.rest.action'),
+		},
 	},
 
 	/**
@@ -85,28 +139,28 @@ module.exports = {
 	},
 
 	/**
- * Methods
- */
+* Methods
+*/
 	methods: {
 
 	},
 
 	/**
- * Service created lifecycle event handler
- */
+* Service created lifecycle event handler
+*/
 	created() {
 
 	},
 
 	/**
- * Service started lifecycle event handler
- */
+* Service started lifecycle event handler
+*/
 	async started() {
 	},
 
 	/**
- * Service stopped lifecycle event handler
- */
+* Service stopped lifecycle event handler
+*/
 	async stopped() {
 	},
 };

@@ -1,7 +1,7 @@
 module.exports = {
 	STATE: {
-		ACTIVED: 'ACTIVED',
-		DEACTIVED: 'DEACTIVED',
+		ACTIVE: 'ACTIVE',
+		DEACTIVE: 'DEACTIVE',
 		EXPIRED: 'EXPIRED',
 	},
 	SCOPE: {

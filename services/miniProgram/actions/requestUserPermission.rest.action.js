@@ -5,6 +5,6 @@ module.exports = async function (ctx) {
 
   } catch (err) {
     if (err.name === 'MoleculerError') throw err;
-    throw new MoleculerError(`detect KYC Token: ${err.message}`);
+    throw new MoleculerError(`[MiniProgram] Request User Permission: ${err.message}`);
   }
 };
