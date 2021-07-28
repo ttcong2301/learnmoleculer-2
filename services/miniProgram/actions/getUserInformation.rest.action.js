@@ -1,6 +1,7 @@
 const { MoleculerError } = require('moleculer').Errors;
 const JsonWebToken = require('jsonwebtoken');
 const _ = require('lodash');
+const moment = require('moment');
 
 const MiniProgramInfoConstant = require('../constants/MiniProgramInfoConstant');
 const MiniProgramUserTokenConstant = require('../constants/MiniProgramUserTokenConstant');
@@ -8,18 +9,17 @@ const MiniProgramUserTokenConstant = require('../constants/MiniProgramUserTokenC
 module.exports = async function (ctx) {
 	try {
 		const payload = ctx.params.body;
-		const { authInfo } = ctx.meta.auth.credentials;
-		console.log('authInfo', authInfo);
-		let userTokenInfo;
-		let miniProgramInfo;
-		try {
-			userTokenInfo = JsonWebToken.verify(payload.userToken, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
-			miniProgramInfo = JsonWebToken.verify(authInfo, process.env.MINIPROGRAM_JWT_SECRETKEY);
-		} catch (err) {
-			throw new MoleculerError(`get User Infomation: ${err.message}`);
-		}
+		const miniProgramInfo = ctx.meta.auth.credentials;
 
-		console.log('userTokenInfo', userTokenInfo);
+		const userTokenInfo = JsonWebToken.verify(payload.userToken, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
+
+		const now = new Date();
+		if (moment(userTokenInfo.expiredAt).isAfter(now)) {
+			return {
+				code: 1001,
+				message: 'Token đã hết hạn',
+			};
+		}
 
 		if (userTokenInfo.miniProgramId !== miniProgramInfo.miniProgramId) {
 			return {
@@ -37,7 +37,6 @@ module.exports = async function (ctx) {
 				message: 'Không tồn tại người dùng này',
 			};
 		}
-		console.log('accountInfo', accountInfo);
 		if (_.includes(userTokenInfo.scope, MiniProgramUserTokenConstant.SCOPE.BASIC)) {
 			userInfo.fullname = accountInfo.fullname;
 			userInfo.email = accountInfo.isVerifiedEmail ? accountInfo.email : null;

@@ -9,35 +9,9 @@ const MiniProgramConstant = require('../constants/MiniProgramInfoConstant');
 module.exports = async function (ctx) {
 	try {
 		const payload = ctx.params.input;
-		const authInfo = ctx.meta.auth.credentials;
+		let authInfo = ctx.meta.auth.credentials;
 		const { miniProgramId } = payload;
-		console.log('payload', payload);
-		console.log('authInfo', authInfo);
-
-		let userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.findOne', [{
-			accountId: authInfo.accountId,
-			miniProgramId: payload.miniProgramId,
-			state: MiniProgramUserTokenConstant.STATE.ACTIVE,
-		}]);
-
-		console.log('userTokenInfo', userTokenInfo);
-
-		const accountInfo = await this.broker.call('v1.accountModel.findOne', [{ id: authInfo.accountId }]);
-
-		let userToken;
-		if (_.get(userTokenInfo, 'id', null) !== null) {
-			const obj = {
-				phone: accountInfo.phone,
-				scope: userTokenInfo.scope,
-				miniProgramId,
-			};
-			userToken = JsonWebToken.sign(obj, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
-			return {
-				succeeded: true,
-				message: 'Lấy UserToken thành công',
-				userToken,
-			};
-		}
+		authInfo = await this.broker.call('auth.default', authInfo);
 
 		const miniProgramInfo = await this.broker.call('v1.MiniProgramInfoModel.findOne', [{ miniProgramId, state: MiniProgramConstant.STATE.ACTIVE }]);
 
@@ -47,26 +21,78 @@ module.exports = async function (ctx) {
 				succeeded: false,
 			};
 		}
+
+		let userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.findOne', [{
+			accountId: authInfo.accountId,
+			miniProgramId: payload.miniProgramId,
+		}]);
+
+		let userToken;
+		if (_.get(userTokenInfo, 'id', null) !== null) {
+			userTokenInfo.scope = userTokenInfo.scope.sort();
+			miniProgramInfo.scope = miniProgramInfo.scope.sort();
+			console.log('userTokenInfo.scope !== miniProgramInfo.scope', userTokenInfo.scope, miniProgramInfo.scope);
+			let state;
+			if (state === MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION || userTokenInfo.scope.toString() !== miniProgramInfo.scope.toString()) {
+				state = MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION;
+			} else state = MiniProgramUserTokenConstant.STATE.ACTIVE;
+			userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.findOneAndUpdate', [{
+				miniProgramId,
+				accountId: authInfo.accountId,
+			}, {
+				expiredAt: moment(new Date()).add(1, 'hour'),
+				scope: miniProgramInfo.scope,
+				state,
+			}, { new: true }]);
+			console.log('userTokenInfo', userTokenInfo);
+
+			const obj = {
+				phone: authInfo.phone,
+				scope: userTokenInfo.scope,
+				miniProgramId,
+				expiredAt: moment(new Date()).add(1, 'hour'),
+			};
+			userToken = JsonWebToken.sign(obj, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
+
+			if (state === MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION) {
+				return {
+					succeeded: false,
+					message: 'Yêu cầu cấp quyền từ người dùng',
+					userToken,
+					state,
+				};
+			}
+
+			return {
+				succeeded: true,
+				message: 'Lấy UserToken thành công',
+				userToken,
+				state,
+			};
+		}
+
 		const userTokenInfoObj = {
 			miniProgramId,
 			accountId: authInfo.accountId,
 			expiredAt: moment(new Date()).add(1, 'hour'),
 			platform: payload.platform,
 			scope: miniProgramInfo.scope,
-			state: MiniProgramUserTokenConstant.STATE.ACTIVE,
+			state: MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION,
 		};
 
 		userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.create', [userTokenInfoObj]);
 		const obj = {
-			phone: accountInfo.phone,
+			phone: authInfo.phone,
 			scope: userTokenInfo.scope,
 			miniProgramId,
+			expiredAt: moment(new Date()).add(1, 'hour'),
 		};
 		userToken = JsonWebToken.sign(obj, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
 		return {
-			succeeded: true,
-			message: 'Lấy UserToken thành công',
+			succeeded: false,
+			message: 'Yêu cầu cấp quyền từ người dùng',
 			userToken,
+			state: MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION,
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;

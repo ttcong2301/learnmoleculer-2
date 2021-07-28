@@ -3,6 +3,7 @@ const JsonWebToken = require('jsonwebtoken');
 const _ = require('lodash');
 const { customAlphabet } = require('nanoid');
 const { numbers } = require('nanoid-dictionary');
+const moment = require('moment');
 
 const MiniProgramInfoConstant = require('../constants/MiniProgramInfoConstant');
 const MiniProgramUserTokenConstant = require('../constants/MiniProgramUserTokenConstant');
@@ -13,14 +14,20 @@ const nanoId = customAlphabet(numbers, 9);
 module.exports = async function (ctx) {
 	try {
 		const payload = ctx.params.body;
-		const { authInfo } = ctx.meta.auth.credentials;
+		const miniProgramInfo = ctx.meta.auth.credentials;
 		let userTokenInfo;
-		let miniProgramInfo;
 		try {
 			userTokenInfo = JsonWebToken.verify(payload.userToken, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
-			miniProgramInfo = JsonWebToken.verify(authInfo, process.env.MINIPROGRAM_JWT_SECRETKEY);
 		} catch (err) {
 			throw new MoleculerError(`get User Infomation: ${err.message}`);
+		}
+
+		const now = new Date();
+		if (moment(userTokenInfo.expiredAt).isAfter(now)) {
+			return {
+				code: 1001,
+				message: 'Token đã hết hạn',
+			};
 		}
 
 		if (userTokenInfo.miniProgramId !== miniProgramInfo.miniProgramId) {
@@ -34,7 +41,15 @@ module.exports = async function (ctx) {
 
 		// const transaction = await this.broker.call('uuid.pick', { prefix: 'MiniProgramOrder', length: 9 });
 		const transaction = nanoId();
-		console.log('transaction', transaction);
+
+		let orderCreate = await this.broker.call('v1.MiniProgramOrderModel.findOne', [{ transaction }]);
+
+		if (_.get(orderCreate, 'id', null) !== null) {
+			return {
+				code: 1001,
+				message: 'Khởi tạo order thất bại',
+			};
+		}
 
 		const orderObj = {
 			accountId: accountInfo.id,
@@ -51,7 +66,7 @@ module.exports = async function (ctx) {
 			state: MiniProgramOrderConstant.STATE.PENDING,
 		};
 
-		const orderCreate = await this.broker.call('v1.MiniProgramOrderModel.create', [orderObj]);
+		orderCreate = await this.broker.call('v1.MiniProgramOrderModel.create', [orderObj]);
 
 		if (_.get(orderCreate, 'id', null) === null) {
 			return {

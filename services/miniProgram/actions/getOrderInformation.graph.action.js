@@ -8,22 +8,15 @@ const MiniProgramOrderConstant = require('../constants/MiniProgramOrderConstant'
 module.exports = async function (ctx) {
 	try {
 		const payload = ctx.params.input;
-		const authInfo = ctx.meta.auth.credentials;
+		let authInfo = ctx.meta.auth.credentials;
 
-		const obj = {
-			accountId: authInfo.accountId,
-			transaction: payload.transaction,
-			state: MiniProgramOrderConstant.STATE.PENDING,
-		};
+		authInfo = await this.broker.call('auth.default', authInfo);
 
-		console.log('obj', obj);
 		const orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOne', [{
 			accountId: authInfo.accountId,
 			transaction: payload.transaction,
 			state: MiniProgramOrderConstant.STATE.PENDING,
 		}]);
-
-		console.log('orderInfo', orderInfo);
 
 		if (_.get(orderInfo, 'id', null) === null) {
 			return {

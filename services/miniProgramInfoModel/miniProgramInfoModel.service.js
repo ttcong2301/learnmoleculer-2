@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const DbService = require('moleculer-db');
 const MongooseAdapter = require('moleculer-db-adapter-mongoose');
 const MongooseAction = require('moleculer-db-adapter-mongoose-action');
-const miniProgramInfoModel = require('./model/miniProgramInfo.model');
+const MiniProgramInfoModel = require('./model/miniProgramInfo.model');
 
 module.exports = {
 	name: 'MiniProgramInfoModel',
@@ -17,7 +17,7 @@ module.exports = {
 		keepAlive: true,
 	}),
 
-	model: miniProgramInfoModel,
+	model: MiniProgramInfoModel,
 
 	/**
 	 * Settings

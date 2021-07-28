@@ -7,7 +7,7 @@ module.exports = async function (ctx) {
 		const payload = ctx.params.body;
 		const { filter } = payload;
 
-		const miniProgramInfos = await this.broker.call('v1.miniProgramInfoModel.findMany', [filter]);
+		const miniProgramInfos = await this.broker.call('v1.MiniProgramInfoModel.findMany', [filter]);
 
 		if (!_.isNil(miniProgramInfos) && _.get(miniProgramInfos[0], 'id', null) !== null) {
 			return {

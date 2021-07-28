@@ -23,8 +23,8 @@ module.exports = {
 				method: 'POST',
 				fullPath: '/v1/External/MiniProgram/CreateOrder',
 				auth: {
-					strategies: ['Default'],
-					mode: 'try', // 'required', 'optional', 'try'
+					strategies: ['MiniProgram'],
+					mode: 'required', // 'required', 'optional', 'try'
 				},
 			},
 			params: {
@@ -35,6 +35,7 @@ module.exports = {
 					amount: 'number',
 					redirectUrl: 'string',
 					failedUrl: 'string',
+					ipnUrl: 'string',
 					description: 'string',
 				},
 			},
@@ -45,8 +46,8 @@ module.exports = {
 				method: 'POST',
 				fullPath: '/v1/External/MiniProgram/UserInformation',
 				auth: {
-					strategies: ['Default'],
-					mode: 'try', // 'required', 'optional', 'try'
+					strategies: ['MiniProgram'],
+					mode: 'required', // 'required', 'optional', 'try'
 				},
 			},
 			params: {
@@ -57,30 +58,12 @@ module.exports = {
 			},
 			handler: require('./actions/getUserInformation.rest.action'),
 		},
-		requestUserPermission: {
-			rest: {
-				method: 'POST',
-				fullPath: '/v1/External/MiniProgram/RequestPermission',
-				auth: {
-					strategies: ['Default'],
-					mode: 'try', // 'required', 'optional', 'try'
-				},
-			},
-			params: {
-				body: {
-					$$type: 'object',
-					userToken: 'string',
-					scope: { type: 'array', items: 'string' },
-				},
-			},
-			handler: require('./actions/requestUserPermission.rest.action'),
-		},
 		add: {
 			rest: {
 				method: 'POST',
 				fullPath: '/v1/Internal/MiniProgram/add',
 				auth: {
-					strategies: ['Local'],
+					strategies: ['Default'],
 					mode: 'try', // 'required', 'optional', 'try'
 				},
 			},
@@ -101,14 +84,13 @@ module.exports = {
 		edit: {
 			rest: {
 				method: 'PUT',
-				fullPath: '/v1/Internal/MiniProgram/{miniProgramId}',
+				fullPath: '/v1/Internal/MiniProgram/:miniProgramId',
 				auth: {
-					strategies: ['Local'],
+					strategies: ['Default'],
 					mode: 'try', // 'required', 'optional', 'try'
 				},
 			},
 			params: {
-				miniProgramId: 'number',
 				body: {
 					$$type: 'object',
 				},

@@ -17,7 +17,7 @@ module.exports = async function (ctx) {
 			logo: payload.logo,
 		};
 		let miniProgramCreate;
-		miniProgramCreate = await this.broker.call('v1.miniProgramInfoModel.create', [obj]);
+		miniProgramCreate = await this.broker.call('v1.MiniProgramInfoModel.create', [obj]);
 
 		if (_.get(miniProgramCreate, 'id', null) === null) {
 			return {
@@ -33,7 +33,7 @@ module.exports = async function (ctx) {
 		};
 
 		const miniProgramToken = JsonWebToken.sign(miniProgramTokenInfo, process.env.MINIPROGRAM_JWT_SECRETKEY);
-		miniProgramCreate = await this.broker.call('v1.miniProgramInfoModel.findOneAndUpdate', [
+		miniProgramCreate = await this.broker.call('v1.MiniProgramInfoModel.findOneAndUpdate', [
 			{
 				id: miniProgramCreate.id,
 			},

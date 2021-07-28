@@ -7,9 +7,10 @@ const MiniProgramConstant = require('../constants/MiniProgramInfoConstant');
 module.exports = async function (ctx) {
 	try {
 		const payload = ctx.params.body;
-		const { miniProgramId } = ctx.params;
+		const { miniProgramId } = ctx.params.params;
+		console.log('miniProgramId', miniProgramId);
 
-		let miniProgramInfo = await this.broker.call('v1.miniProgramInfoModel.findOne', [{
+		let miniProgramInfo = await this.broker.call('v1.MiniProgramInfoModel.findOne', [{
 			miniProgramId,
 		}]);
 
@@ -32,7 +33,7 @@ module.exports = async function (ctx) {
 
 		const miniProgramToken = JsonWebToken.sign(miniProgramTokenInfo, process.env.MINIPROGRAM_JWT_SECRETKEY);
 
-		miniProgramInfo = await this.broker.call('v1.miniProgramInfoModel.findOneAndUpdate', [{
+		miniProgramInfo = await this.broker.call('v1.MiniProgramInfoModel.findOneAndUpdate', [{
 			id: miniProgramInfo.id,
 		}, {
 			url: payload.url || miniProgramInfo.url,

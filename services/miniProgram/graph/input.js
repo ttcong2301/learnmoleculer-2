@@ -15,6 +15,11 @@ input MiniProgramPayInput {
   clientId: String!
 }
 
+input MiniProgramRequestPermissionInput {
+  userToken: String
+  securityCode: String
+}
+
 input PaymentWalletInput {
   active: Boolean!
   securityCode: String

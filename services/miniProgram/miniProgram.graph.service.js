@@ -24,6 +24,9 @@ module.exports = {
 					Pay: {
 						action: 'v1.MiniProgram.graph.pay',
 					},
+					RequestPermission: {
+						action: 'v1.MiniProgram.graph.requestPermission',
+					},
 				},
 			},
 		},
@@ -38,6 +41,16 @@ module.exports = {
 		 * Actions
 		 */
 	actions: {
+		requestPermission: {
+			params: {
+				input: {
+					$$type: 'object',
+					userToken: 'string',
+					securityCode: 'string',
+				},
+			},
+			handler: require('./actions/requestUserPermission.graph.action'),
+		},
 		getUserToken: {
 			params: {
 				input: {
