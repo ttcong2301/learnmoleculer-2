@@ -9,6 +9,10 @@ type MiniProgramOps {
   GetOrderInformation(input: MiniProgramGetOrderInformationInput!): MiniProgramGetOrderInformationResponsed
   "Tạo KYC Token"
   Pay(input: MiniProgramPayInput!): MiniProgramPayResponsed
+  "Yêu cầu cấp quyền"
+  RequestPermission(input: MiniProgramRequestPermissionInput!): MiniProgramRequestPermissionResponsed
+  "Danh sách Mini Program"
+  GetList(input: MiniProgramGetListInput): MiniProgramGetListResponsed
 }
 
 type MiniProgramGetUserTokenResponsed {
@@ -16,6 +20,7 @@ type MiniProgramGetUserTokenResponsed {
   userToken: String
   message: String
   succeeded: Boolean
+  state: MiniProgramGetUserTokenStateEnum
 }
 
 type MiniProgramGetOrderInformationResponsed {
@@ -41,5 +46,25 @@ type MiniProgramPayResponsed {
   orderInfo: MiniProgramOrderInfo
   redirectUrl: String
   failedUrl: String
+}
+
+type MiniProgramRequestPermissionResponsed {
+  succeeded: Boolean
+  message: String
+}
+
+type MiniProgramGetListResponsed {
+  succeeded: Boolean
+  message: String
+  miniProgram: [MiniProgramInfo]
+}
+
+type MiniProgramInfo {
+  id: BigInt
+  miniProgramId: BigInt
+  state: MiniProgramStateEnum
+  name: String
+  logo: String
+  url: String
 }
 `;

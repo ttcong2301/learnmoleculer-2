@@ -15,6 +15,16 @@ input MiniProgramPayInput {
   clientId: String!
 }
 
+input MiniProgramRequestPermissionInput {
+  userToken: String
+  securityCode: String
+}
+
+input MiniProgramGetListInput {
+  state: [MiniProgramStateEnum]
+  miniProgramId: BigInt
+  id: BigInt
+}
 input PaymentWalletInput {
   active: Boolean!
   securityCode: String

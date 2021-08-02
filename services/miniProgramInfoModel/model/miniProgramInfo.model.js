@@ -10,11 +10,6 @@ const nanoId = customAlphabet(alphanumeric, 15);
 autoIncrement.initialize(mongoose);
 
 const Schema = mongoose.Schema({
-	id: {
-		type: Number,
-		required: true,
-		unique: true,
-	},
 	miniProgramId: {
 		type: Number,
 		require: true,
@@ -23,7 +18,7 @@ const Schema = mongoose.Schema({
 	miniProgramToken: {
 		type: String,
 		require: true,
-		unique: true,
+		default: null,
 	},
 	url: {
 		type: String,
