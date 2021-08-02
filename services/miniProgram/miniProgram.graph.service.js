@@ -1,3 +1,7 @@
+const _ = require('lodash');
+
+const MiniProgramInfoConstant = require('./constants/MiniProgramInfoConstant');
+
 module.exports = {
 	name: 'MiniProgram.graph',
 
@@ -26,6 +30,9 @@ module.exports = {
 					},
 					RequestPermission: {
 						action: 'v1.MiniProgram.graph.requestPermission',
+					},
+					GetList: {
+						action: 'v1.MiniProgram.graph.getList',
 					},
 				},
 			},
@@ -79,6 +86,30 @@ module.exports = {
 				},
 			},
 			handler: require('./actions/pay.graph.action'),
+		},
+		getList: {
+			params: {
+				input: {
+					$$type: 'object',
+					id: {
+						type: 'number',
+						optional: true,
+					},
+					miniProgramId: {
+						type: 'number',
+						optional: true,
+					},
+					state: {
+						type: 'array',
+						optional: true,
+						items: {
+							type: 'string',
+							enum: _.values(MiniProgramInfoConstant.STATE),
+						},
+					},
+				},
+			},
+			handler: require('./actions/getList.graph.action'),
 		},
 		MiniProgramOps: {
 			graphql: {

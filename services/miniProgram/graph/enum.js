@@ -1,6 +1,14 @@
 const gql = require('moleculer-apollo-server').moleculerGql;
 
 module.exports = gql` 
+enum MiniProgramStateEnum {
+  "Đang hoạt động"
+  ACTIVE
+  "Dừng hoat động"
+  DEACTIVE
+  "Hết hạn"
+  EXPIRED
+}
 enum MiniProgramGetUserTokenStateEnum{
   "Đang hoạt động"
   ACTIVE

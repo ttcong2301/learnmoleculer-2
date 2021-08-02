@@ -11,6 +11,8 @@ type MiniProgramOps {
   Pay(input: MiniProgramPayInput!): MiniProgramPayResponsed
   "Yêu cầu cấp quyền"
   RequestPermission(input: MiniProgramRequestPermissionInput!): MiniProgramRequestPermissionResponsed
+  "Danh sách Mini Program"
+  GetList(input: MiniProgramGetListInput): MiniProgramGetListResponsed
 }
 
 type MiniProgramGetUserTokenResponsed {
@@ -49,5 +51,20 @@ type MiniProgramPayResponsed {
 type MiniProgramRequestPermissionResponsed {
   succeeded: Boolean
   message: String
+}
+
+type MiniProgramGetListResponsed {
+  succeeded: Boolean
+  message: String
+  miniProgram: [MiniProgramInfo]
+}
+
+type MiniProgramInfo {
+  id: BigInt
+  miniProgramId: BigInt
+  state: MiniProgramStateEnum
+  name: String
+  logo: String
+  url: String
 }
 `;

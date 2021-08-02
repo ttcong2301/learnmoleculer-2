@@ -20,6 +20,11 @@ input MiniProgramRequestPermissionInput {
   securityCode: String
 }
 
+input MiniProgramGetListInput {
+  state: [MiniProgramStateEnum]
+  miniProgramId: BigInt
+  id: BigInt
+}
 input PaymentWalletInput {
   active: Boolean!
   securityCode: String
