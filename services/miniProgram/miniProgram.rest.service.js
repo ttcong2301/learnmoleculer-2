@@ -1,3 +1,7 @@
+const _ = require('lodash');
+
+const MiniProgramInfoConstant = require('./constants/MiniProgramInfoConstant');
+
 module.exports = {
 	name: 'MiniProgram.rest',
 
@@ -110,6 +114,109 @@ module.exports = {
 				body: 'object',
 			},
 			handler: require('./actions/search.rest.action'),
+		},
+		requestPermission: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/External/MiniProgram/RequestPermission',
+				auth: {
+					strategies: ['Default'],
+					mode: 'required', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: 'object',
+					userToken: 'string',
+					securityCode: 'string',
+				},
+			},
+			handler: require('./actions/requestUserPermission.rest.action'),
+		},
+		getUserToken: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/External/MiniProgram/GetUserToken',
+				auth: {
+					strategies: ['Default'],
+					mode: 'required', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: 'object',
+					miniProgramId: 'number',
+				},
+			},
+			handler: require('./actions/getUserToken.rest.action'),
+		},
+		getOrderInformation: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/External/MiniProgram/GetOrderInformation',
+				auth: {
+					strategies: ['Default'],
+					mode: 'required', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: 'object',
+					transaction: 'string',
+				},
+			},
+			handler: require('./actions/getOrderInformation.rest.action'),
+		},
+		pay: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/External/MiniProgram/Pay',
+				auth: {
+					strategies: ['Default'],
+					mode: 'required', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: 'object',
+					transaction: 'string',
+					payment: 'object',
+					clientId: 'string',
+				},
+			},
+			handler: require('./actions/pay.rest.action'),
+		},
+		getList: {
+			rest: {
+				method: 'POST',
+				fullPath: '/v1/External/MiniProgram/GetList',
+				auth: {
+					strategies: ['Default'],
+					mode: 'required', // 'required', 'optional', 'try'
+				},
+			},
+			params: {
+				body: {
+					$$type: 'object',
+					id: {
+						type: 'number',
+						optional: true,
+					},
+					miniProgramId: {
+						type: 'number',
+						optional: true,
+					},
+					state: {
+						type: 'array',
+						optional: true,
+						items: {
+							type: 'string',
+							enum: _.values(MiniProgramInfoConstant.STATE),
+						},
+					},
+				},
+			},
+			handler: require('./actions/getList.rest.action'),
 		},
 	},
 
