@@ -27,7 +27,9 @@ module.exports = async function (ctx) {
 		return {
 			message: 'Lấy thông tin order thành công',
 			code: 1000,
-			orderInfo,
+			data: {
+				orderInfo,
+			},
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;
