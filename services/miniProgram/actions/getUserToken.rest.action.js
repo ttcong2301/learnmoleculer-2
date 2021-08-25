@@ -17,8 +17,10 @@ module.exports = async function (ctx) {
 
 		if (_.get(miniProgramInfo, 'id', null) === null) {
 			return {
-				message: 'Không tìm thấy thông tin Mini Program',
 				code: 1001,
+				data: {
+					message: 'Không tìm thấy thông tin Mini Program',
+				},
 			};
 		}
 
@@ -57,17 +59,21 @@ module.exports = async function (ctx) {
 			if (state === MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION) {
 				return {
 					code: 1001,
-					message: 'Yêu cầu cấp quyền từ người dùng',
-					userToken,
-					state,
+					data: {
+						message: 'Yêu cầu cấp quyền từ người dùng',
+						userToken,
+						state,
+					},
 				};
 			}
 
 			return {
 				code: 1000,
-				message: 'Lấy UserToken thành công',
-				userToken,
-				state,
+				data: {
+					message: 'Lấy UserToken thành công',
+					userToken,
+					state,
+				},
 			};
 		}
 
@@ -90,9 +96,11 @@ module.exports = async function (ctx) {
 		userToken = JsonWebToken.sign(obj, process.env.MINIPROGRAM_USER_JWT_SECRETKEY);
 		return {
 			code: 1001,
-			message: 'Yêu cầu cấp quyền từ người dùng',
-			userToken,
-			state: MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION,
+			data: {
+				message: 'Yêu cầu cấp quyền từ người dùng',
+				userToken,
+				state: MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION,
+			},
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;

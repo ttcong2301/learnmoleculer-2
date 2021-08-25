@@ -1,6 +1,7 @@
 const _ = require('lodash');
 
 const MiniProgramInfoConstant = require('./constants/MiniProgramInfoConstant');
+const MeAPI = require('../../serviceDependencies/MEAPI');
 
 module.exports = {
 	name: 'MiniProgram.rest',
@@ -231,7 +232,6 @@ module.exports = {
 * Methods
 */
 	methods: {
-
 	},
 
 	/**
@@ -245,6 +245,14 @@ module.exports = {
 * Service started lifecycle event handler
 */
 	async started() {
+		const url = process.env.FE_URL;
+		const isSecurity = process.env.FE_SECURITY === 'true';
+		const privateKey = process.env.FE_PRIVATEKEY;
+		const publicKey = process.env.FE_PUBLICKEY;
+
+		this.historyService = new MeAPI({
+			url, publicKey, privateKey, isSecurity: false, 'x-api-client': 'app',
+		});
 	},
 
 	/**
