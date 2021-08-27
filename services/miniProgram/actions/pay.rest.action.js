@@ -63,6 +63,7 @@ module.exports = async function (ctx) {
 		});
 
 		history = _.get(history, 'data.data.history');
+		console.log('history', JSON.stringify(history));
 
 		if (_.get(history, 'id', null) === null) {
 			orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOneAndUpdate', [{

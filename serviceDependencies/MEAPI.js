@@ -103,6 +103,7 @@ class MeAPI {
 				meAPIHeader = encrypt.headers;
 				body = encrypt.body;
 			}
+			console.log('url', url);
 
 			// console.log(body, _.merge(meAPIHeader, headers));
 			const response = await Axios.post(url, body, {
