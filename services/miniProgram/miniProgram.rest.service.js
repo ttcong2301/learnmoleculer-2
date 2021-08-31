@@ -251,7 +251,7 @@ module.exports = {
 		const publicKey = process.env.FE_PUBLICKEY;
 
 		this.historyService = new MeAPI({
-			url, publicKey, privateKey, isSecurity: false, 'x-api-client': 'app',
+			url, publicKey, privateKey, isSecurity, 'x-api-client': 'app',
 		});
 	},
 
