@@ -129,7 +129,7 @@ module.exports = async function (ctx) {
 			return {
 				code: 1001,
 				data: {
-					message: 'Thanh toán Mini Program thất bại',
+					message: paymentResponse.message || 'Thanh toán Mini Program thất bại',
 				},
 			};
 		}
