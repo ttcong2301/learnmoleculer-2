@@ -5,6 +5,7 @@ const Numeral = require('numeral');
 
 const MiniProgramOrderConstant = require('../constants/MiniProgramOrderConstant');
 const PaymentConstant = require('../constants/PaymentConstant');
+const FrontendConstant = require('../constants/FrontendConstant');
 
 module.exports = async function (ctx) {
 	try {
@@ -15,13 +16,9 @@ module.exports = async function (ctx) {
 
 		const { transaction } = payload;
 
-		let orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOneAndUpdate', [{
+		let orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOne', [{
 			transaction,
 			state: MiniProgramOrderConstant.STATE.PENDING,
-		}, {
-			state: MiniProgramOrderConstant.STATE.SUCCEEDED,
-		}, {
-			new: true,
 		}]);
 
 		if (_.get(orderInfo, 'id', null) === null) {
@@ -32,53 +29,60 @@ module.exports = async function (ctx) {
 				},
 			};
 		}
-		const historyObj = {
-			accountId: authInfo.accountId,
-			service: {
-				type: MiniProgramOrderConstant.SERVICE_TYPE.MINI_PROGRAM_ORDER_PAYMENT,
-				id: orderInfo.id,
-				transaction,
-				state: orderInfo.state,
-				name: 'Thanh toán Mini Program Order',
-				data: {
-					resolveType: 'MiniProgramObject',
-					miniProgramOrderId: orderInfo.id,
-					transaction,
-					accountId: authInfo.accountId,
-					state: orderInfo.state,
-				},
-			},
-			appId: authInfo.appId || 0,
-			amount: orderInfo.amount,
-			fee: orderInfo.fee,
-			total: orderInfo.total,
-			state: 'PENDING',
-			description: `Thanh toán Mini Program ${Numeral(orderInfo.amount).format('0,0')}VNĐ.`,
-			changed: '-',
-			tags: [],
-		};
+
 		let history = await this.historyService.Post('/v3/History/Service', {
-			method: 'CREATE',
-			src: historyObj,
+			method: 'FindByFields',
+			src: {
+				accountId: authInfo.accountId,
+				'service.type': MiniProgramOrderConstant.SERVICE_TYPE,
+				'service.id': orderInfo.id,
+			},
 		});
 
-		console.log('history', JSON.stringify(history));
 		history = _.get(history, 'data.data.history');
 
-		if (_.get(history, 'id', null) === null) {
-			orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOneAndUpdate', [{
-				transaction,
-			}, {
-				state: MiniProgramOrderConstant.STATE.FAILED,
-			}, {
-				new: true,
-			}]);
-			return {
-				succeeded: false,
-				data: {
-					message: 'Tạo lệnh thanh toán Mini Program thất bại, vui lòng thử lại sau (E002)',
+		if (_.get(history, 'id', null) === null || _.get(history, 'state', '') !== FrontendConstant.HISTORY_STATE.PENDING) {
+			const historyObj = {
+				accountId: authInfo.accountId,
+				service: {
+					type: MiniProgramOrderConstant.SERVICE_TYPE.MINI_PROGRAM_ORDER_PAYMENT,
+					id: orderInfo.id,
+					transaction,
+					state: orderInfo.state,
+					name: 'Thanh toán Mini Program Order',
+					data: {
+						resolveType: 'MiniProgramObject',
+						miniProgramOrderId: orderInfo.id,
+						transaction,
+						accountId: authInfo.accountId,
+						state: orderInfo.state,
+					},
 				},
+				appId: authInfo.appId || 0,
+				amount: orderInfo.amount,
+				fee: orderInfo.fee,
+				total: orderInfo.total,
+				state: FrontendConstant.HISTORY_STATE.PENDING,
+				description: `Thanh toán Mini Program ${Numeral(orderInfo.amount).format('0,0')}VNĐ.`,
+				changed: '-',
+				tags: [],
 			};
+			history = await this.historyService.Post('/v3/History/Service', {
+				method: 'CREATE',
+				src: historyObj,
+			});
+
+			console.log('history', JSON.stringify(history));
+			history = _.get(history, 'data.data.history');
+
+			if (_.get(history, 'id', null) === null) {
+				return {
+					succeeded: false,
+					data: {
+						message: 'Tạo lệnh thanh toán Mini Program thất bại, vui lòng thử lại sau (E002)',
+					},
+				};
+			}
 		}
 
 		const paramsPayment = {
@@ -94,11 +98,8 @@ module.exports = async function (ctx) {
 			payment: payload.payment,
 		};
 
-		console.log('paramsPayment', paramsPayment);
-
 		const paymentResponse = await this.broker.call('v1.Payment.Pay', paramsPayment);
 		console.log('paymentResponse', paymentResponse);
-
 		if (
 			[
 				PaymentConstant.STATE.FAILED,
@@ -106,23 +107,16 @@ module.exports = async function (ctx) {
 				PaymentConstant.STATE.BALANCE_NOT_ENOUGHT,
 			].includes(paymentResponse.state)
 		) {
-			orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOneAndUpdate', [{
-				transaction,
-				state: MiniProgramOrderConstant.STATE.SUCCEEDED,
-			}, {
-				state: MiniProgramOrderConstant.STATE.PENDING,
-			}, {
-				new: true,
-			}]);
-			history = await this.historyService.Post('/v1/HistoryAPI/Service', {
+			history = await this.historyService.Post('/v3/History/Service', {
 				method: 'UPDATE',
 				src: {
 					accountId: authInfo.accountId,
 					'service.transaction': transaction,
-					state: MiniProgramOrderConstant.STATE.SUCCEEDED,
+					'service.state': MiniProgramOrderConstant.STATE.PENDING,
 				},
 				dest: {
-					state: MiniProgramOrderConstant.STATE.FAILED,
+					'service.state': MiniProgramOrderConstant.STATE.PENDING,
+					state: FrontendConstant.HISTORY_STATE.FAILED,
 				},
 			});
 			history = _.get(history, 'data.data.history');
@@ -135,28 +129,37 @@ module.exports = async function (ctx) {
 		}
 
 		if (paymentResponse.state === PaymentConstant.STATE.SUCCEEDED) {
-			history = await this.historyService.Post('/v1/HistoryAPI/Service', {
+			orderInfo = await this.broker.call('v1.MiniProgramOrderModel.findOneAndUpdate', [{
+				transaction,
+				state: MiniProgramOrderConstant.STATE.PENDING,
+			}, {
+				state: MiniProgramOrderConstant.STATE.SUCCEEDED,
+			}, { new: true }]);
+
+			history = await this.historyService.Post('/v3/History/Service', {
 				method: 'UPDATE',
 				src: {
 					'service.transaction': transaction,
-					state: MiniProgramOrderConstant.STATE.SUCCEEDED,
+					'service.state': MiniProgramOrderConstant.STATE.PENDING,
 				},
 				dest: {
+					'service.state': MiniProgramOrderConstant.STATE.SUCCEEDED,
+					state: FrontendConstant.HISTORY_STATE.SUCCEEDED,
 					balance: paymentResponse.balance,
 					payment: paymentResponse.payment,
 				},
 			});
+			console.log('history', history);
 			history = _.get(history, 'data.data.history');
 
-			const ipnState = await axios.post(orderInfo.ipnUrl, {
-				state: 'SUCCEEDED',
-				amount: orderInfo.amount,
-				transaction: orderInfo.partnerTransaction,
-				phone: authInfo.phone,
-			});
+			// const ipnState = await axios.post(orderInfo.ipnUrl, {
+			// 	state: 'SUCCEEDED',
+			// 	amount: orderInfo.amount,
+			// 	transaction: orderInfo.partnerTransaction,
+			// 	phone: authInfo.phone,
+			// });
 
-			console.log('ipnState', ipnState);
-
+			// console.log('ipnState', ipnState);
 			return {
 				code: 1000,
 				data: {
@@ -164,29 +167,19 @@ module.exports = async function (ctx) {
 					orderInfo,
 					redirectUrl: orderInfo.redirectUrl,
 					failedUrl: orderInfo.failedUrl,
+					historyId: history.id,
 				},
 			};
 		}
 
 		return {
-			code: 1000,
+			code: 1001,
 			data: {
 				message: paymentResponse.message,
 				payment: paymentResponse,
 				historyId: history.id,
 			},
 		};
-
-		// const paymentResponse = await this.broker.call();
-
-		// // Trường hợp yêu cầu otp từ linked bank
-		// if (paymentResponse.state === PaymentConstant.STATE.REQUIRED_OTP) {
-		// 	// cần OTP từ bank
-		// 	response.message = 'Vui lòng nhập OTP';
-		// 	response.historyId = history.id;
-		// 	response.payment = paymentResponse;
-		// 	return response;
-		// }
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;
 		throw new MoleculerError(`[MiniProgram] Pay: ${err.message}`);

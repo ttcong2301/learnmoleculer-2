@@ -45,8 +45,11 @@ module.exports = async function (ctx) {
 
 		const accountInfo = await this.broker.call('v1.accountModel.findOne', [{ phone: userTokenInfo.phone }]);
 
+		const transaction = await this.broker.call('uuid.pick', {
+			prefix: 'MINI_PROGRAM_ORDER',
+		});
 		// const transaction = await this.broker.call('uuid.pick', { prefix: 'MiniProgramOrder', length: 9 });
-		const transaction = nanoId();
+		// const transaction = nanoId();
 
 		let orderCreate = await this.broker.call('v1.MiniProgramOrderModel.findOne', [{ transaction }]);
 
