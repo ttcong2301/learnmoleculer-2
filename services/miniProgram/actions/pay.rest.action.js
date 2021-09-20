@@ -34,7 +34,7 @@ module.exports = async function (ctx) {
 			method: 'FindByFields',
 			src: {
 				accountId: authInfo.accountId,
-				'service.type': MiniProgramOrderConstant.SERVICE_TYPE,
+				'service.type': MiniProgramOrderConstant.SERVICE_TYPE.MINI_PROGRAM_ORDER_PAYMENT,
 				'service.id': orderInfo.id,
 			},
 		});
@@ -115,8 +115,10 @@ module.exports = async function (ctx) {
 					'service.state': MiniProgramOrderConstant.STATE.PENDING,
 				},
 				dest: {
-					'service.state': MiniProgramOrderConstant.STATE.PENDING,
+					'service.state': MiniProgramOrderConstant.STATE.FAILED,
+					'service.data.state': MiniProgramOrderConstant.STATE.FAILED,
 					state: FrontendConstant.HISTORY_STATE.FAILED,
+					changed: null,
 				},
 			});
 			history = _.get(history, 'data.data.history');
@@ -139,11 +141,13 @@ module.exports = async function (ctx) {
 			history = await this.historyService.Post('/v3/History/Service', {
 				method: 'UPDATE',
 				src: {
+					'service.type': MiniProgramOrderConstant.SERVICE_TYPE.MINI_PROGRAM_ORDER_PAYMENT,
 					'service.transaction': transaction,
 					'service.state': MiniProgramOrderConstant.STATE.PENDING,
 				},
 				dest: {
 					'service.state': MiniProgramOrderConstant.STATE.SUCCEEDED,
+					'service.data.state': MiniProgramOrderConstant.STATE.SUCCEEDED,
 					state: FrontendConstant.HISTORY_STATE.SUCCEEDED,
 					balance: paymentResponse.balance,
 					payment: paymentResponse.payment,
@@ -151,6 +155,16 @@ module.exports = async function (ctx) {
 			});
 			console.log('history', history);
 			history = _.get(history, 'data.data.history');
+
+			const noti = await this.historyService.Post('/v3/Local/Notification', {
+				accountId: orderInfo.accountId,
+				message: `Bạn đã thanh toán thành công Mini Program số tiền ${Numeral(orderInfo.total).format('0,0')}đ.`,
+				extraData: history,
+				title: `${history.service.name}`,
+			}, process.env.FE_ACCESSTOKEN);
+			console.log('process.env.FE_ACCESSTOKEN', process.env.FE_ACCESSTOKEN);
+
+			console.log('noti', noti);
 
 			// const ipnState = await axios.post(orderInfo.ipnUrl, {
 			// 	state: 'SUCCEEDED',
