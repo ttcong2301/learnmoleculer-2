@@ -29,7 +29,7 @@ module.exports = async function (ctx) {
 				code: 1000,
 				data: {
 					message: 'Lấy danh sách Mini Program thành công',
-					miniProgram: miniProgramList,
+					data: miniProgramList,
 				},
 			};
 		}

@@ -34,7 +34,7 @@ module.exports = async function (ctx) {
 			userTokenInfo.scope = userTokenInfo.scope.sort();
 			miniProgramInfo.scope = miniProgramInfo.scope.sort();
 			console.log('userTokenInfo.scope !== miniProgramInfo.scope', userTokenInfo.scope, miniProgramInfo.scope);
-			let state;
+			let { state } = userTokenInfo;
 			if (state === MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION || userTokenInfo.scope.toString() !== miniProgramInfo.scope.toString()) {
 				state = MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION;
 			} else state = MiniProgramUserTokenConstant.STATE.ACTIVE;
@@ -85,6 +85,8 @@ module.exports = async function (ctx) {
 			scope: miniProgramInfo.scope,
 			state: MiniProgramUserTokenConstant.STATE.REQUIRE_PERMISSION,
 		};
+
+		console.log('userTokenInfoObj', userTokenInfoObj);
 
 		userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.create', [userTokenInfoObj]);
 		const obj = {

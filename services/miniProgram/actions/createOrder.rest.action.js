@@ -45,6 +45,17 @@ module.exports = async function (ctx) {
 
 		const accountInfo = await this.broker.call('v1.accountModel.findOne', [{ phone: userTokenInfo.phone }]);
 
+		userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.findOne', [{ accountId: accountInfo.id }]);
+
+		if (_.get(userTokenInfo, 'state', null) !== MiniProgramUserTokenConstant.STATE.ACTIVE) {
+			return {
+				code: 1001,
+				data: {
+					message: 'Token không đúng',
+				},
+			};
+		}
+
 		const transaction = await this.broker.call('uuid.pick', {
 			prefix: 'MINI_PROGRAM_ORDER',
 		});

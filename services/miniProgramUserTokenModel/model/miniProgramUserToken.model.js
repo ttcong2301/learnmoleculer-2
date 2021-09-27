@@ -18,7 +18,6 @@ const Schema = mongoose.Schema({
 	miniProgramId: {
 		type: Number,
 		require: true,
-		unique: true,
 	},
 	accountId: {
 		type: Number,
