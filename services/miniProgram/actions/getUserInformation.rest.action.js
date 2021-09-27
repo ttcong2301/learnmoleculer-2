@@ -17,7 +17,9 @@ module.exports = async function (ctx) {
 		if (moment(userTokenInfo.expiredAt).isAfter(now)) {
 			return {
 				code: 1001,
-				message: 'Token đã hết hạn',
+				data: {
+					message: 'Token đã hết hạn',
+				},
 			};
 		}
 
@@ -34,7 +36,9 @@ module.exports = async function (ctx) {
 		if (_.get(accountInfo, 'id', null) === null) {
 			return {
 				code: 1001,
-				message: 'Không tồn tại người dùng này',
+				data: {
+					message: 'Không tồn tại người dùng này',
+				},
 			};
 		}
 		if (_.includes(userTokenInfo.scope, MiniProgramUserTokenConstant.SCOPE.BASIC)) {
@@ -53,8 +57,10 @@ module.exports = async function (ctx) {
 		}
 		return {
 			code: 1000,
-			message: 'Lấy thông tin thành công',
-			userInfo,
+			data: {
+				message: 'Lấy thông tin thành công',
+				userInfo,
+			},
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;

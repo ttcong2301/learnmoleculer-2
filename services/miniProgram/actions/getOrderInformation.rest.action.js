@@ -20,14 +20,18 @@ module.exports = async function (ctx) {
 
 		if (_.get(orderInfo, 'id', null) === null) {
 			return {
-				message: 'không tìm thấy order này',
 				code: 1001,
+				data: {
+					message: 'không tìm thấy order này',
+				},
 			};
 		}
 		return {
 			message: 'Lấy thông tin order thành công',
 			code: 1000,
-			orderInfo,
+			data: {
+				orderInfo,
+			},
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;

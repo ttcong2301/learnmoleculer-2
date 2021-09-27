@@ -23,31 +23,53 @@ module.exports = async function (ctx) {
 		}
 
 		const now = new Date();
-		if (moment(userTokenInfo.expiredAt).isAfter(now)) {
+		console.log(userTokenInfo);
+		console.log('now', now);
+		if (moment(now).isAfter(userTokenInfo.expiredAt)) {
 			return {
 				code: 1001,
-				message: 'Token đã hết hạn',
+				data: {
+					message: 'Token đã hết hạn',
+				},
 			};
 		}
 
 		if (userTokenInfo.miniProgramId !== miniProgramInfo.miniProgramId) {
 			return {
 				code: 1001,
-				message: 'Token không đúng',
+				data: {
+					message: 'Token không đúng',
+				},
 			};
 		}
 
 		const accountInfo = await this.broker.call('v1.accountModel.findOne', [{ phone: userTokenInfo.phone }]);
 
+		userTokenInfo = await this.broker.call('v1.MiniProgramUserTokenModel.findOne', [{ accountId: accountInfo.id }]);
+
+		if (_.get(userTokenInfo, 'state', null) !== MiniProgramUserTokenConstant.STATE.ACTIVE) {
+			return {
+				code: 1001,
+				data: {
+					message: 'Token không đúng',
+				},
+			};
+		}
+
+		const transaction = await this.broker.call('uuid.pick', {
+			prefix: 'MINI_PROGRAM_ORDER',
+		});
 		// const transaction = await this.broker.call('uuid.pick', { prefix: 'MiniProgramOrder', length: 9 });
-		const transaction = nanoId();
+		// const transaction = nanoId();
 
 		let orderCreate = await this.broker.call('v1.MiniProgramOrderModel.findOne', [{ transaction }]);
 
 		if (_.get(orderCreate, 'id', null) !== null) {
 			return {
 				code: 1001,
-				message: 'Khởi tạo order thất bại',
+				data: {
+					message: 'Khởi tạo order thất bại',
+				},
 			};
 		}
 
@@ -71,15 +93,19 @@ module.exports = async function (ctx) {
 		if (_.get(orderCreate, 'id', null) === null) {
 			return {
 				code: 1001,
-				message: 'Khởi tạo order thất bại',
+				data: {
+					message: 'Khởi tạo order thất bại',
+				},
 			};
 		}
 
 		return {
 			code: 1000,
-			message: 'Thành công',
-			transaction,
-			paymentUrl: `${process.env.MINIPROGRAM_PAYMENT_URL}${transaction}`,
+			data: {
+				message: 'Thành công',
+				transaction,
+				paymentUrl: `${process.env.MINIPROGRAM_PAYMENT_URL}${transaction}`,
+			},
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;

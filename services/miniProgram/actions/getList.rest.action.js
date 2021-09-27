@@ -27,13 +27,17 @@ module.exports = async function (ctx) {
 			// });
 			return {
 				code: 1000,
-				message: 'Lấy danh sách Mini Program thành công',
-				miniProgram: miniProgramList,
+				data: {
+					message: 'Lấy danh sách Mini Program thành công',
+					data: miniProgramList,
+				},
 			};
 		}
 		return {
 			code: 1001,
-			message: 'Lấy danh sách Mini Program thất bại',
+			data: {
+				message: 'Lấy danh sách Mini Program thất bại',
+			},
 		};
 	} catch (err) {
 		if (err.name === 'MoleculerError') throw err;
