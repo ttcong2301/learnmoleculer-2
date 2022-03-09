@@ -40,27 +40,15 @@ module.exports = {
 				params: {
 					body: {
 						$$type: 'object',
-						password: {
-							type: 'string',
-							required: true,
-						},
-						fullName: {
-							type: 'string',
-							required: true,
-						},
-						phone: {
-							type: 'string',
-							required: true,
-						},
+						password: 'string|required|min:6',
+						fullName: 'string|required',
+						phone: 'string|required',
 						gender: {
 							type: 'string',
 							enum: ['male', 'female'],
 							required: true
 						},
-						avatar: {
-							type: 'string',
-							required: false
-						}
+						avatar: 'string|optional'
 					}
 				}
 			},
