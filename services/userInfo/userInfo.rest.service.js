@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const MeAPI = require('../../serviceDependencies/MEAPI');
 const { sign } = require('jsonwebtoken');
+const { Gender } = require('./constants/gender.constant');
 
 module.exports = {
 	name: 'userInfo.rest',
@@ -9,7 +10,7 @@ module.exports = {
 	 * Settings
 	 */
 	settings: {
-		JWT_SECRET: process.env.JWT_SECRET || 'secret',
+		JWT_SECRET: process.env.JWT_SECRET || 'secret'
 	},
 
 	/**
@@ -18,16 +19,19 @@ module.exports = {
 	dependencies: [],
 
 	/**
-		 * Actions
-		 */
+	 * Actions
+	 */
 	actions: {
 		getUserInfo: {
 			rest: {
 				method: 'GET',
-				fullPath: '/user/getUserInfo/:email',
-				auth: false,
+				fullPath: '/user/getUserInfo/',
+				auth: {
+					strategies: ['jwt'],
+					mode: 'required'
+				}
 			},
-			handler: require('./actions/getUserInfo.action'),
+			handler: require('./actions/getUserInfo.action')
 		},
 		updateUserInfo: {
 			rest: {
@@ -35,37 +39,38 @@ module.exports = {
 				fullPath: '/user/updateUserInfo/',
 				auth: {
 					strategies: ['jwt'],
-					mode: 'required',
+					mode: 'required'
 				},
 				params: {
 					body: {
 						$$type: 'object',
-						password: 'string|required|min:6',
-						fullName: 'string|required',
-						phone: 'string|required',
+						password: 'string|optional|min:6',
+						fullName: 'string|optional',
+						phone: {
+							type: 'string',
+							pattern: /([\+84|84|0]+(3|5|7|8|9|1[2|6|8|9]))+([0-9]{8})\b/,
+							optional: true
+						},
 						gender: {
 							type: 'string',
-							enum: ['male', 'female'],
-							required: true
+							enum: Object.values(Gender),
+							optional: true
 						},
 						avatar: 'string|optional'
 					}
 				}
 			},
-			handler: require('./actions/updateUserInfo.action'),
+			handler: require('./actions/updateUserInfo.action')
 		}
-
 	},
 	/**
- * Events
- */
-	events: {
-
-	},
+	 * Events
+	 */
+	events: {},
 
 	/**
-* Methods
-*/
+	 * Methods
+	 */
 	methods: {
 		generateJWT(payload) {
 			return sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -73,15 +78,13 @@ module.exports = {
 	},
 
 	/**
-* Service created lifecycle event handler
-*/
-	created() {
-
-	},
+	 * Service created lifecycle event handler
+	 */
+	created() {},
 
 	/**
-* Service started lifecycle event handler
-*/
+	 * Service started lifecycle event handler
+	 */
 	async started() {
 		const url = process.env.FE_URL;
 		const isSecurity = process.env.FE_SECURITY === 'true';
@@ -89,13 +92,16 @@ module.exports = {
 		const publicKey = process.env.FE_PUBLICKEY;
 
 		this.historyService = new MeAPI({
-			url, publicKey, privateKey, isSecurity, 'x-api-client': 'app',
+			url,
+			publicKey,
+			privateKey,
+			isSecurity,
+			'x-api-client': 'app'
 		});
 	},
 
 	/**
-* Service stopped lifecycle event handler
-*/
-	async stopped() {
-	},
+	 * Service stopped lifecycle event handler
+	 */
+	async stopped() {}
 };
